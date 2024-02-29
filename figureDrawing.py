@@ -4,11 +4,15 @@ from djitellopy import Tello   # Tello Drone
 # Створення об'єкту Tello
 my_drone = Tello()
 
+# Введення даних для підключення до дрону
+drone_ip = input("Будь ласка, введіть IP-адресу дрона: ")
+drone_port = input("Будь ласка, введіть порт дрона: ")
+
 # Піключення до дрону
-my_drone.connect()
+my_drone.connect(drone_ip, drone_port)
 
 # Вказуємо шлях до зображення
-image_path = input("Пожалуйста, введите путь к изображению: ")
+image_path = input("Будь-ласка, введіть шлях до зображення: ")
 
 # Завантаження зображення
 image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
