@@ -4,12 +4,8 @@ from djitellopy import Tello   # Tello Drone
 # Створення об'єкту Tello
 my_drone = Tello()
 
-# Введення даних для підключення до дрону
-drone_ip = input("Будь ласка, введіть IP-адресу дрона: ")
-drone_port = input("Будь ласка, введіть порт дрона: ")
-
 # Піключення до дрону
-my_drone.connect(drone_ip, drone_port)
+my_drone.connect()
 
 # Вказуємо шлях до зображення
 image_path = input("Будь-ласка, введіть шлях до зображення: ")
@@ -31,9 +27,8 @@ for contour in contours:
     # Проходимо по усім точкам
     for point in points:
         # Задаємо напрям для малювання
-        my_drone.move_up(point[0])  # Початковий підйом
-        my_drone.move_forward(point[0])
-        my_drone.move_right(point[1])
+        my_drone.move_forward(point[0])  # Переміщення вперед
+        my_drone.move_right(point[1])  # Переміщення вправо
 
 # Приземляємо дрон після малювання
 my_drone.land()
