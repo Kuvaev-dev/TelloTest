@@ -6,6 +6,7 @@ my_drone = Tello()
 
 # Піключення до дрону
 my_drone.connect()
+my_drone.takeoff()
 
 # Вказуємо шлях до зображення
 image_path = input("Будь-ласка, введіть шлях до зображення: ")
