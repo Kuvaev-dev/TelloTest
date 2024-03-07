@@ -11,7 +11,7 @@ def main():
         return
 
     if not my_drone.takeoff():
-        print("Помилка взльоту дрону.")
+        print("Помилка зльоту дрону.")
         return
 
     # Вказуємо шлях до зображення
