@@ -31,5 +31,7 @@ for contour in contours:
         my_drone.move_forward(point[0])  # Переміщення вперед
         my_drone.move_right(point[1])  # Переміщення вправо
 
-# Приземляємо дрон після малювання
+# Приземляємо дрон після малюванняна на поаткову точку
+my_drone.move_back(0)
+my_drone.move_left(0)
 my_drone.land()
