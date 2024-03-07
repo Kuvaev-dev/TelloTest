@@ -1,8 +1,7 @@
-# Імпортуємо необхідні бібліотеки
-import cv2 # для роботи з зображеннями
-import numpy as np # для роботи з масивами
-import tello # для роботи з дроном
-import time # для роботи з часом
+import cv2 # Зіитування зображення
+import numpy as np # Робота з масивом пікселів
+from djitellopy import Tello # Дрон
+import time # Для затримок дрону
 
 # Створюємо об'єкт дрона
 drone = tello.Tello()
@@ -10,16 +9,14 @@ drone = tello.Tello()
 # Підключаємося до дрона
 drone.connect()
 
-# Отримуємо рівень батареї
+# Отримуємо та виводимо рівень батареї
 battery = drone.get_battery()
-
-# Виводимо рівень батареї
 print(f"Рівень батареї: {battery}%")
 
 # Злітаємо
 drone.takeoff()
 
-# Чекаємо 5 секунд
+# Чекаємо 5 секунд для стабілізації
 time.sleep(5)
 
 # Прохання користувача ввести шлях до зображення
@@ -44,25 +41,21 @@ contour = contours[0]
 epsilon = 0.01 * cv2.arcLength(contour, True)
 polygon = cv2.approxPolyDP(contour, epsilon, True)
 
-# Знаходимо кількість вершин полігона
-vertices = len(polygon)
+# Зберігаємо початкову позицію
+start_x, start_y = 0, 0
 
-# В залежності від кількості вершин полігона, задаємо напрямок польоту дрона
-if vertices == 3:
-    # Трикутник - летимо вліво
-    drone.move_left(100)
-elif vertices == 4:
-    # Прямокутник - летимо вправо
-    drone.move_right(100)
-elif vertices == 5:
-    # П'ятикутник - летимо вгору
-    drone.move_up(100)
-elif vertices == 6:
-    # Шестикутник - летимо вниз
-    drone.move_down(100)
-else:
-    # Невизначена фігура - летимо назад
-    drone.move_back(100)
+# Проходимо по всіх точках полігона
+for point in polygon:
+    x, y = point[0]
+    # Рухаємося до наступної точки
+    drone.move_right(x - start_x)
+    drone.move_up(y - start_y)
+    # Оновлюємо поточну позицію
+    start_x, start_y = x, y
+
+# Повертаємося до початкової позиції
+drone.move_left(start_x)
+drone.move_down(start_y)
 
 # Чекаємо 5 секунд
 time.sleep(5)
