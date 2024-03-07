@@ -1,67 +1,71 @@
-import cv2  
-from djitellopy import Tello   
+# Імпортуємо необхідні бібліотеки
+import cv2 # для роботи з зображеннями
+import numpy as np # для роботи з масивами
+import tello # для роботи з дроном
+import time # для роботи з часом
 
-def main():
-    # Створення об'єкту Tello
-    my_drone = Tello()
+# Створюємо об'єкт дрона
+drone = tello.Tello()
 
-    # Підключення до дрону
-    if not my_drone.connect():
-        print("Помилка підключення до дрону.")
-        return
+# Підключаємося до дрона
+drone.connect()
 
-    if not my_drone.takeoff():
-        print("Помилка зльоту дрону.")
-        return
+# Отримуємо рівень батареї
+battery = drone.get_battery()
 
-    # Вказуємо шлях до зображення
-    image_path = input("Будь-ласка, введіть шлях до зображення: ")
+# Виводимо рівень батареї
+print(f"Рівень батареї: {battery}%")
 
-    # Завантаження зображення
-    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-    if image is None:
-        print("Не вдалося завантажити зображення.")
-        return
+# Злітаємо
+drone.takeoff()
 
-    # Для отримання бінарного зображення задаємо порогове значення
-    _, binary_image = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+# Чекаємо 5 секунд
+time.sleep(5)
 
-    # Знаходимо контури на бінарному зображенні
-    contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# Прохання користувача ввести шлях до зображення
+image_path = input("Введіть шлях до зображення: ")
 
-    # Проходимо по усім контурам
-    for contour in contours:
-        # Знаходимо центр маси контуру
-        M = cv2.moments(contour)
-        if M["m00"] != 0:
-            # m00 - нульовий момент (область контуру), m19 - перший момент контуру за віссю Х (сума значень пікселів, помножених на їх відстань від вісі Y)
-            cx = int(M["m10"] / M["m00"])
-            cy = int(M["m01"] / M["m00"])
-            
-            # Переміщення дрона до центру маси контуру з плавною зміною висоти
-            if not my_drone.go_xyz_speed(cx - image.shape[1] // 2, cy - image.shape[0] // 2, 0, 30):
-                print("Помилка переміщення дрона.")
-                return
-            
-            # Затримка між кадрами для стабілізації дрону
-            cv2.waitKey(500)
+# Зчитуємо зображення
+image = cv2.imread(image_path)
 
-    # Зупинка дрона перед приземленням
-    if not my_drone.send_rc_control(0, 0, 0, 0):
-        print("Помилка управління дроном.")
-        return
+# Перетворюємо зображення в відтінки сірого
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Затримка перед приземленням для стабілізації
-    cv2.waitKey(2000)
+# Знаходимо контури на зображенні
+contours, hierarchy = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Приземлення дрона
-    if not my_drone.land():
-        print("Помилка приземлення дрона.")
-        return
+# Сортуємо контури за площею в порядку спадання
+contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
-    # Затримка перед завершенням програми
-    cv2.waitKey(5000)
-    cv2.destroyAllWindows()
+# Беремо перший контур (найбільший)
+contour = contours[0]
 
-if __name__ == "__main__":
-    main()
+# Апроксимуємо контур за допомогою полігона
+epsilon = 0.01 * cv2.arcLength(contour, True)
+polygon = cv2.approxPolyDP(contour, epsilon, True)
+
+# Знаходимо кількість вершин полігона
+vertices = len(polygon)
+
+# В залежності від кількості вершин полігона, задаємо напрямок польоту дрона
+if vertices == 3:
+    # Трикутник - летимо вліво
+    drone.move_left(100)
+elif vertices == 4:
+    # Прямокутник - летимо вправо
+    drone.move_right(100)
+elif vertices == 5:
+    # П'ятикутник - летимо вгору
+    drone.move_up(100)
+elif vertices == 6:
+    # Шестикутник - летимо вниз
+    drone.move_down(100)
+else:
+    # Невизначена фігура - летимо назад
+    drone.move_back(100)
+
+# Чекаємо 5 секунд
+time.sleep(5)
+
+# Сідаємо
+drone.land()
