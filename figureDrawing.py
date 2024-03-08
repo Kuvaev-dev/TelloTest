@@ -1,4 +1,4 @@
-import cv2 # Зчитування зображення
+import cv2 # Зчитування зображення та створення полігону
 import numpy as np # Робота з масивом пікселів
 from djitellopy import Tello # Дрон
 import time # Для затримок дрону
