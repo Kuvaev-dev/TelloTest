@@ -20,7 +20,7 @@ def draw_contour(contour, img_shape):
 
 def main():
     # Зчитуємо зображення
-    img = cv2.imread('figures/star.jpg', cv2.IMREAD_GRAYSCALE)
+    img = cv2.imread('figures/square.jpg', cv2.IMREAD_GRAYSCALE)
 
     # Змінюємо розмір зображення
     img = cv2.resize(img, (200, 200))
