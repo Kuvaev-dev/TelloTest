@@ -1,7 +1,7 @@
+from djitellopy import Tello
 import cv2
-import turtle
 
-def draw_contour(contour, img_shape):
+def draw_contour(contour, img_shape, tello):
     h, w = img_shape
     for i in range(len(contour)):
         x = contour[i][0][0]
@@ -10,20 +10,26 @@ def draw_contour(contour, img_shape):
         x = x - w/2
         y = h/2 - y
         if i == 0:
-            turtle.penup()
-            turtle.goto(x, y)
-            turtle.pendown()
+            tello.move_up(y)
+            tello.move_right(x)
         else:
-            turtle.goto(x, y)
+            tello.move_right(x)
+            tello.move_up(y)
 
 def main():
+    # Ініціалізуємо дрон
+    tello = Tello()
+    tello.connect()
+    tello.takeoff()
+
     # Зчитуємо зображення
-    img = cv2.imread('figures/star.jpg', cv2.IMREAD_GRAYSCALE)
+    image_path = input("Введіть шлях до зображення: ")
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
     # Змінюємо розмір зображення
     img = cv2.resize(img, (200, 200))
 
-    # Застосовуємо розмиття Гаусса
+    # Застосовуємо розмиття Гаусса для деталізації та покращення якості зображення
     img = cv2.GaussianBlur(img, (5, 5), 0)
 
     # Застосовуємо адаптивне порогове значення
@@ -35,13 +41,11 @@ def main():
     # Знаходимо контури
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
-    # Відображаємо контури за допомогою turtle
-    turtle.speed(1)
+    # Відображаємо контури за допомогою дрона
     for contour in contours:
-        draw_contour(contour, img.shape)  # використовуємо contour замість cv2.convexHull(contour)
+        draw_contour(contour, img.shape, tello)  # використовуємо contour замість cv2.convexHull(contour)
     
-    turtle.done()
-    turtle.mainloop()  # додаємо цей рядок
+    tello.land()
 
 if __name__ == "__main__":
     main()
