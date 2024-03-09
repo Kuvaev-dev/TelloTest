@@ -2,13 +2,16 @@ from djitellopy import Tello
 import cv2
 
 def draw_contour(contour, img_shape, tello):
+    # Задаємо параметри фігури зображення (height, width)
     h, w = img_shape
     for i in range(len(contour)):
-        x = contour[i][0][0]
-        y = contour[i][0][1]
+        x = contour[i][0][0]  # Отримуємо x-координату i-тої точки контуру
+        y = contour[i][0][1]  # Отримуємо y-координату i-тої точки контуру
+
         # Перетворюємо координати
-        x = x - w/2
-        y = h/2 - y
+        x = x - w/2  # Переміщуємо x-координату так, щоб центр зображення був в (0,0)
+        y = h/2 - y  # Переміщуємо y-координату так, щоб центр зображення був в (0,0), та інвертуємо ось y, оскільки в зображеннях ось y спрямована вниз
+
         if i == 0:
             tello.move_up(y)
             tello.move_right(x)
