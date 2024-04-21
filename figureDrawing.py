@@ -23,7 +23,7 @@ def main():
     img = cv2.imread('figures/square.jpg', cv2.IMREAD_GRAYSCALE)
 
     # Змінюємо розмір зображення
-    img = cv2.resize(img, (200, 200))
+    img = cv2.resize(img, (100, 100))
 
     # Застосовуємо розмиття Гаусса
     img = cv2.GaussianBlur(img, (5, 5), 0)
